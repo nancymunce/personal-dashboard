@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Nancy Munce Personal Dashboard — your personal links, saved in Supabase.">
+  <title>Nancy Munce Personal Dashboard</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Personal workspace</p>
+      <h1>Nancy Munce Personal Dashboard</h1>
+    </div>
+    <div class="top-actions">
+      <span id="authStatus" class="auth-status" role="status">Checking sign-in…</span>
+      <button id="signInBtn" class="ghost-btn" type="button">Sign in to edit</button>
+      <button id="signOutBtn" class="ghost-btn hidden" type="button">Sign out</button>
+      <button id="favoritesBtn" class="ghost-btn" type="button" aria-pressed="false">★ Favorites</button>
+      <button id="addResourceBtn" class="primary-btn" type="button">+ Add Resource</button>
+    </div>
+  </header>
+
+  <main id="main" class="shell">
+    <p id="setupBanner" class="banner hidden" role="alert"></p>
+    <p id="statusLine" class="status-line" role="status" aria-live="polite"></p>
+
+    <section class="hero">
+      <div>
+        <h2>Everything you need, organized by the way you work.</h2>
+        <p>Choose a category, search across every resource, or add something new. Your links are saved in Supabase, so clearing your browser cache won't lose them.</p>
+      </div>
+      <div class="search-wrap">
+        <label class="visually-hidden" for="globalSearch">Search by name, description, tag, or category</label>
+        <span aria-hidden="true">⌕</span>
+        <input id="globalSearch" type="search" placeholder="Search by name, description, tag, or category" autocomplete="off">
+      </div>
+    </section>
+
+    <section id="homeView" aria-labelledby="categoriesHeading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Browse</p>
+          <h2 id="categoriesHeading">Categories</h2>
+        </div>
+        <p id="resourceCount" class="muted"></p>
+      </div>
+      <div id="categoryGrid" class="category-grid"></div>
+    </section>
+
+    <section id="categoryView" class="hidden" aria-labelledby="categoryTitle">
+      <button id="backBtn" class="back-btn" type="button">← All categories</button>
+      <div class="category-header">
+        <div>
+          <p class="eyebrow">Category</p>
+          <h2 id="categoryTitle"></h2>
+          <p id="categorySubtitle" class="muted"></p>
+        </div>
+        <div class="search-wrap compact">
+          <label class="visually-hidden" for="categorySearch">Search this category</label>
+          <span aria-hidden="true">⌕</span>
+          <input id="categorySearch" type="search" placeholder="Search this category" autocomplete="off">
+        </div>
+      </div>
+      <div id="resourceGrid" class="resource-grid"></div>
+    </section>
+
+    <section id="favoritesView" class="hidden" aria-labelledby="favoritesHeading">
+      <button id="backFromFavoritesBtn" class="back-btn" type="button">← All categories</button>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Starred</p>
+          <h2 id="favoritesHeading">Favorites</h2>
+        </div>
+      </div>
+      <div id="favoritesGrid" class="resource-grid"></div>
+    </section>
+  </main>
+
+  <dialog id="resourceDialog" aria-labelledby="dialogTitle">
+    <form id="resourceForm" method="dialog">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">Resource</p>
+          <h2 id="dialogTitle">Add Resource</h2>
+        </div>
+        <button type="button" id="closeDialog" class="icon-btn" aria-label="Close">×</button>
+      </div>
+      <input id="resourceId" type="hidden">
+      <label>Site or resource name <input id="resourceName" required autocomplete="off"></label>
+      <label>Website URL <input id="resourceUrl" type="url" required placeholder="https://" autocomplete="off"></label>
+      <label>Category <select id="resourceCategory" required></select></label>
+      <label id="newCategoryLabel" class="hidden">New category name <input id="newCategoryName" placeholder="Example: Travel" autocomplete="off"></label>
+      <label>Description <textarea id="resourceDescription" rows="4" required></textarea></label>
+      <label>Type <input id="resourceType" placeholder="Example: Shop, Dashboard, AI Tool" autocomplete="off"></label>
+      <label>Tags <input id="resourceTags" placeholder="Separate tags with commas" autocomplete="off"></label>
+      <label class="check-row"><input id="resourceFavorite" type="checkbox"> Add to favorites</label>
+      <p id="formError" class="form-error hidden" role="alert"></p>
+      <div class="dialog-actions">
+        <button type="button" id="cancelDialog" class="ghost-btn">Cancel</button>
+        <button type="submit" class="primary-btn">Save Resource</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmDialog" aria-labelledby="confirmTitle">
+    <form method="dialog">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">Confirm</p>
+          <h2 id="confirmTitle">Delete this resource?</h2>
+        </div>
+      </div>
+      <p id="confirmText"></p>
+      <div class="dialog-actions">
+        <button type="button" id="confirmCancel" class="ghost-btn">Cancel</button>
+        <button type="submit" id="confirmDelete" class="danger-btn">Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="authDialog" aria-labelledby="authDialogTitle">
+    <form id="authForm" method="dialog">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">Sign in</p>
+          <h2 id="authDialogTitle">Sign in to edit</h2>
+        </div>
+        <button type="button" id="closeAuth" class="icon-btn" aria-label="Close">×</button>
+      </div>
+      <p>Viewing works without signing in. Signing in lets you add, edit, delete, and star links — changes are saved in Supabase. Use the same email you use for the Reseller Command Center.</p>
+      <label>Email <input id="authEmail" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+      <label>Password <span class="muted">(only if you set a password — otherwise leave blank and use the magic link)</span> <input id="authPassword" type="password" autocomplete="current-password"></label>
+      <p id="authError" class="form-error hidden" role="alert"></p>
+      <p id="authNote" class="muted hidden" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" id="cancelAuth" class="ghost-btn">Cancel</button>
+        <button type="button" id="magicLinkBtn" class="ghost-btn">Email me a magic link</button>
+        <button type="submit" class="primary-btn">Sign in</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="manageDialog" aria-labelledby="manageTitle">
+    <div class="dialog-header">
+      <div><p class="eyebrow">Data</p><h2 id="manageTitle">Manage Your Resources</h2></div>
+      <button type="button" id="closeManage" class="icon-btn" aria-label="Close">×</button>
+    </div>
+    <p>Your links are stored in Supabase, not in this browser — clearing your cache won't lose them. Export a backup copy any time.</p>
+    <div class="stack">
+      <button id="exportBtn" class="primary-btn" type="button">Export Updated Resources</button>
+      <label class="file-label">Import Resource File <input id="importInput" type="file" accept=".json"></label>
+      <button id="reloadBtn" class="ghost-btn" type="button">Reload from Supabase</button>
+    </div>
+    <p id="manageNote" class="muted" role="status"></p>
+  </dialog>
+
+  <footer>
+    <span>Nancy Munce Personal Dashboard</span>
+    <span class="muted">Links saved in Supabase · <a href="https://github.com/nancymunce/personal-dashboard">GitHub repo</a></span>
+    <button id="manageBtn" class="link-btn" type="button">Manage data</button>
+  </footer>
+
+  <template id="categoryCardTemplate">
+    <button class="category-card" type="button">
+      <div class="category-icon" aria-hidden="true"></div>
+      <div>
+        <h3></h3>
+        <p></p>
+      </div>
+      <span class="arrow" aria-hidden="true">→</span>
+    </button>
+  </template>
+
+  <template id="resourceCardTemplate">
+    <article class="resource-card">
+      <div class="resource-card-top">
+        <span class="type-pill"></span>
+        <button class="favorite-btn" type="button" title="Toggle favorite" aria-label="Toggle favorite">☆</button>
+      </div>
+      <h3></h3>
+      <p class="description"></p>
+      <div class="tag-list"></div>
+      <div class="resource-actions">
+        <a class="open-link" target="_blank" rel="noopener">Open Resource ↗</a>
+        <button class="edit-btn" type="button">Edit</button>
+        <button class="delete-btn" type="button">Delete</button>
+      </div>
+    </article>
+  </template>
+
+  <!-- Supabase browser client. The publishable key is designed to be public;
+       Row Level Security in Supabase protects the data. Same pattern as the
+       Reseller Command Center. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
