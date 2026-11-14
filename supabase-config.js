@@ -9,3 +9,6 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
+// `const` at the top level does not attach to `window`, so expose it
+// explicitly — app.js looks it up as window.supabaseClient.
+window.supabaseClient = supabaseClient;

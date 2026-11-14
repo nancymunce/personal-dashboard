@@ -79,8 +79,11 @@
   /* ---------- data ---------- */
 
   function supabase() {
-    if (typeof window.supabaseClient === "undefined" || !window.supabaseClient) return null;
-    return window.supabaseClient;
+    if (typeof window.supabaseClient !== "undefined" && window.supabaseClient) return window.supabaseClient;
+    // Fallback for the lexical global (as in the Reseller Command Center,
+    // which references `supabaseClient` directly).
+    if (typeof supabaseClient !== "undefined" && supabaseClient) return supabaseClient;
+    return null;
   }
 
   function loadSeed() {
@@ -132,7 +135,7 @@
         banner.classList.remove("hidden");
         banner.textContent = missing
           ? "Supabase setup needed: the personal_dashboard_resources table does not exist yet. These " + rows.length + " links are the published list, shown read-only. Run supabase.sql in your Supabase dashboard (see the README in the GitHub repo), then reload this page — no links will be lost."
-          : "Supabase could not be reached, so these " + rows.length + " links are the published list, shown read-only. Check your connection and reload.";
+          : "Supabase could not be reached, so these " + rows.length + " links are the published list, shown read-only. Check your connection and reload." + (err && err.message ? " (" + err.message + ")" : "");
         setStatus(rows.length + " links · read-only until Supabase is connected");
         render();
       });
